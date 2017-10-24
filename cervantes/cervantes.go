@@ -1,0 +1,90 @@
+package main
+
+import (
+	//log "github.com/Sirupsen/logrus"
+	//"github.com/Stratio/cervantes/routes"
+	//"github.com/codegangsta/cli"
+	//"golang.org/x/net/context"
+	//"os"
+	"fmt"
+	"github.com/jpgilaberte/cervantes/agent"
+)
+
+var (
+	Version string
+	Build   string
+)
+
+func main() {
+	/*
+	agentCommand := cli.Command{
+		Name:      "agent",
+		ShortName: "a",
+		Usage:     "Serve Agent API",
+		Flags:     []cli.Flag{FlAddr, FlLog},
+		Action:    action(agentAction),
+	}
+	orchestratorCommand := cli.Command{
+		Name:      "orchestrator",
+		ShortName: "o",
+		Usage:     "Serve orchestrator API",
+		Flags:     []cli.Flag{FlAddr, FlLog},
+		Action:    action(orchestratorAction),
+	}
+	Run("cervantes", orchestratorCommand, agentCommand)
+	*/
+	worker := agent.NewWorkerIO()
+	response := new(agent.MsgWorkerIOResponse)
+	response.Err = make(chan error)
+	req := &agent.MsgWorkerIORequest{Res: response, CurrentUnit: &agent.Unit{Name: "example.service"}}
+	worker.AddUnit <- req
+	err := <- req.Res.Err
+
+	fmt.Printf("--------------------- %v", err)
+}
+/*
+func action(f func(c *cli.Context) error) func(c *cli.Context) {
+	return func(c *cli.Context) {
+		setLogLevel(c)
+		err := f(c)
+		if err != nil {
+			log.Error("PANIC: " + err.Error())
+			os.Exit(1)
+		}
+	}
+}
+
+func agentAction(c *cli.Context) error {
+	setDBusInstance()
+	return startServer(c, routes.RoutesAgent)
+}
+
+func orchestratorAction(c *cli.Context) error {
+	return startServer(c, routes.RoutesOrchestrator)
+}
+
+func startServer(c *cli.Context, r map[string]map[string]routes.Handler) error {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, "ip", c.String("ip"))
+	log.Info("Serving api")
+	return ServeCmd(c, ctx, r)
+}
+
+func setLogLevel(c *cli.Context) {
+	level, err := log.ParseLevel(c.String("log"))
+	if err != nil {
+		log.Fatalf("Wrong log level: %v. Use INFO or DEBUG options", err.Error())
+		os.Exit(1)
+	}
+	log.SetLevel(level)
+	log.Infof("Log is ready in level: %v", level)
+}
+
+func setDBusInstance() {
+	if err := dbus.DbusInstance.StartSystemDBus(); err != nil {
+		log.Fatalf("Error initializating D-Bus system. Stop the program. FATAL: %v", err)
+		os.Exit(1)
+	}
+	log.Info("DBus is ready")
+}
+*/
